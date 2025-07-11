@@ -10,15 +10,19 @@ import {
   NetFlowCellRenders,
 } from '../../grid/common.js'
 import { setupDropdownSelector } from '../dropdown-selector.js'
+import { createFisColumn } from '../../grid/fis-column.js'
+import { installResizeHandler } from '../../grid/resize.js'
 
 export function setupNetworkAssetsGrid(element, network) {
   let grid
+  let gridOptions
+  let fisColumn
   let data
   let currentTimeFrame
   let currentType = 'volume'
 
   function install() {
-    const gridOptions = {
+    gridOptions = {
       rowData: [],
       theme: themeGrid,
       suppressCellFocus: true,
@@ -81,28 +85,32 @@ export function setupNetworkAssetsGrid(element, network) {
     }
 
     grid = createGrid(element, gridOptions)
+    fisColumn = createFisColumn(
+      grid,
+      gridOptions,
+      {
+        totalKey: 'total',
+        netflowKey: 'netflow',
+      },
+      network
+    )
   }
 
   function update(period, type) {
     currentType = type
     currentTimeFrame = period
+    fisColumn.show(type === 'volume')
 
-    if (currentType === 'volume') {
-      getNetworkAssetsSeries(period, network, 'usd').then((newData) => {
-        data = newData
-        grid.setGridOption('rowData', data)
-      })
-    } else if (currentType === 'asset') {
-      getNetworkAssetsSeries(period, network, 'asset').then((newData) => {
-        data = newData
-        grid.setGridOption('rowData', data)
-      })
-    } else {
-      getNetworkAssetsSeries(period, network, 'tx').then((newData) => {
-        data = newData
-        grid.setGridOption('rowData', data)
-      })
-    }
+    const fetchFn = {
+      volume: () => getNetworkAssetsSeries(period, network, 'usd'),
+      asset: () => getNetworkAssetsSeries(period, network, 'asset'),
+      count: () => getNetworkAssetsSeries(period, network, 'tx'),
+    }[type]
+
+    fetchFn().then((newData) => {
+      data = fisColumn.update(newData)
+      grid.setGridOption('rowData', data)
+    })
   }
 
   install()
@@ -122,21 +130,10 @@ export function setupNetworkAssetsGrid(element, network) {
     'volume'
   )
 
-  let w =
-    window.innerWidth ||
-    document.documentElement.clientWidth ||
-    document.body.clientWidth
-  window.addEventListener('resize', () => {
-    const nw =
-      window.innerWidth ||
-      document.documentElement.clientWidth ||
-      document.body.clientWidth
-    if (w !== nw) {
-      w = nw
-      element.textContent = ''
-      install()
-
-      grid.setGridOption('rowData', data)
-    }
+  installResizeHandler(() => {
+    element.textContent = ''
+    install()
+    fisColumn.onResize()
+    grid.setGridOption('rowData', data)
   })
 }
