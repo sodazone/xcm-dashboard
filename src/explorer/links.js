@@ -1,3 +1,4 @@
+const TX_BY_INDEX = ['neckwork', 'statescan']
 const EXPLORERS = {
   'urn:ocn:polkadot:0': {
     type: 'subscan',
@@ -42,8 +43,8 @@ const EXPLORERS = {
     url: 'https://centrifuge.subscan.io',
   },
   'urn:ocn:polkadot:2034': {
-    type: 'subscan',
-    url: 'https://hydration.subscan.io',
+    type: 'neckwork',
+    url: 'https://hydration-explorer.neckwork.net',
   },
   'urn:ocn:ethereum:222222': {
     type: 'subscan',
@@ -116,6 +117,11 @@ const EXPLORERS = {
 }
 
 const EXPLORER_VERBS = {
+  neckwork: {
+    address: 'account',
+    block: 'block',
+    tx: 'extrinsic',
+  },
   subscan: {
     address: 'account',
     block: 'block',
@@ -157,7 +163,7 @@ function resolveURL(chainId, verb, param, pref) {
   const base = resolved.url
   const path = EXPLORER_VERBS[resolved.type][verb]
 
-  if (resolved.type === 'statescan' && verb === 'tx') {
+  if (TX_BY_INDEX.includes(resolved.type) && verb === 'tx') {
     if (typeof param === 'string') return null
     const { blockNumber, extrinsicIndex } = param
     return `${base}/${path}/${blockNumber}-${extrinsicIndex}`
