@@ -77,6 +77,10 @@ const ExtraChains = [
     urn: 'urn:ocn:ethereum:222222',
   },
   {
+    runtimeChain: 'Robinhood Chain',
+    urn: 'urn:ocn:ethereum:4663',
+  },
+  {
     runtimeChain: 'Aptos',
     urn: 'urn:ocn:aptos:1',
   },
