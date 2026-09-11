@@ -106,6 +106,10 @@ const EXPLORERS = {
     type: 'etherscan',
     url: 'https://optimistic.etherscan.io',
   },
+  'urn:ocn:ethereum:4663': {
+    type: 'blockscout',
+    url: 'https://robinhoodchain.blockscout.com',
+  },
   'urn:ocn:solana:101': {
     type: 'solscan',
     url: 'https://solscan.io',
@@ -133,6 +137,11 @@ const EXPLORER_VERBS = {
     tx: '#/extrinsics',
   },
   etherscan: {
+    address: 'address',
+    block: 'block',
+    tx: 'tx',
+  },
+  blockscout: {
     address: 'address',
     block: 'block',
     tx: 'tx',
